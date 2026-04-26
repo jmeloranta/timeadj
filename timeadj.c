@@ -92,7 +92,7 @@ int main(int argc, char *argv[]) {
   gtk_window_set_default_size(GTK_WINDOW(window), 100, 80);
   g_signal_connect(G_OBJECT(window), "destroy", G_CALLBACK(closewin), NULL);
 
-  adj_label = gtk_label_new("Adjust to match WSJTX: ");
+  adj_label = gtk_label_new("Current time offset: ");
   gtk_label_set_xalign(GTK_LABEL(adj_label), 0.0); // 0 = left, 1 = right
   adj = gtk_label_new("0.0 s");
   gtk_label_set_xalign(GTK_LABEL(adj), 0.0); // 0 = left, 1 = right
