@@ -1,8 +1,6 @@
 /*
  * System clock adjustment tool. 
  *
- * Needs to be run as root. GTK+ does not like setuid programs.
- *
  */
 
 #define _GNU_SOURCE
@@ -72,25 +70,16 @@ void cleanup(int x) {
   exit(0);
 }  
 
-void closewin(GtkWidget *win, gpointer data) {
-
-  cleanup(1);
-  gtk_main_quit();
-  exit(0);
-}
-
 int main(int argc, char *argv[]) {
 
   GtkWidget *window, *hbox1, *hbox2, *vbox;
   GtkWidget *adj_label, *button_down, *button_up;
   
   signal(SIGINT, cleanup);
-  gtk_init(&argc, &argv);
-  window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+  gtk_init();
+  window = gtk_window_new();
   gtk_window_set_title(GTK_WINDOW(window), "Time adjustment");
-  gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
   gtk_window_set_default_size(GTK_WINDOW(window), 100, 80);
-  g_signal_connect(G_OBJECT(window), "destroy", G_CALLBACK(closewin), NULL);
 
   adj_label = gtk_label_new("Current time offset: ");
   gtk_label_set_xalign(GTK_LABEL(adj_label), 0.0); // 0 = left, 1 = right
@@ -105,23 +94,27 @@ int main(int argc, char *argv[]) {
   button_up = gtk_button_new_with_label("Up   0.1 s");
   button_auto = gtk_button_new_with_label("Auto OFF");
 
-  gtk_box_pack_start(GTK_BOX(hbox1), adj_label, TRUE, TRUE, 5);
-  gtk_box_pack_start(GTK_BOX(hbox1), adj, TRUE, TRUE, 5);
+  gtk_box_append(GTK_BOX(hbox1), adj_label);
+  gtk_box_append(GTK_BOX(hbox1), adj);
+  
+  gtk_box_append(GTK_BOX(hbox2), button_down);
+  gtk_box_append(GTK_BOX(hbox2), button_up);
+  gtk_box_append(GTK_BOX(hbox2), button_auto);
 
-  gtk_box_pack_start(GTK_BOX(hbox2), button_down, TRUE, TRUE, 5);
-  gtk_box_pack_start(GTK_BOX(hbox2), button_up, TRUE, TRUE, 5);
-  gtk_box_pack_start(GTK_BOX(hbox2), button_auto, TRUE, TRUE, 5);
+ 
+  gtk_box_append(GTK_BOX(vbox), hbox1);
+  gtk_box_append(GTK_BOX(vbox), hbox2);
 
-  gtk_box_pack_start(GTK_BOX(vbox), hbox1, TRUE, TRUE, 5);
-  gtk_box_pack_start(GTK_BOX(vbox), hbox2, TRUE, TRUE, 5);
-
-  gtk_container_add(GTK_CONTAINER(window), vbox);
+  gtk_window_set_child(GTK_WINDOW(window), vbox);
 
   g_signal_connect(button_down, "clicked", G_CALLBACK(time_down), NULL);
   g_signal_connect(button_up, "clicked", G_CALLBACK(time_up), NULL);
   g_signal_connect(button_auto, "clicked", G_CALLBACK(time_auto), NULL);
 
-  gtk_widget_show_all(window);
+  gtk_widget_set_visible(window, TRUE);
 
-  gtk_main();  
+  while (g_list_model_get_n_items(gtk_window_get_toplevels()) > 0) // Main iteration loop
+    g_main_context_iteration(NULL, TRUE);
+
+  cleanup(1);
 }
