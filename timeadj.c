@@ -18,6 +18,7 @@ void time_down(GtkWidget *win, gpointer data) {
 
   char buf[128];
 
+  if(ntp_enabled) return;
   cur_offset -= 0.1;
   sprintf(buf, "%s -0.1", ADJTIMEX);
   system(buf);
@@ -29,6 +30,7 @@ void time_up(GtkWidget *win, gpointer data) {
 
   char buf[64];
 
+  if(ntp_enabled) return;
   cur_offset += 0.1;
   sprintf(buf, "%s 0.1", ADJTIMEX);
   system(buf);
